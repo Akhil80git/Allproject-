@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Navigation Page</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .navbar {
+            background-color: #333;
+            padding: 10px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .navbar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0 10px;
+            display: inline-flex;
+        }
+        
+        .navbar li {
+            display: inline-block;
+            margin: 0 5px;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            display: inline-block;
+        }
+        
+        .navbar a:hover {
+            background-color: #555;
+        }
+        
+        .navbar a.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+            padding: 0 15px;
+        }
+        
+        .content-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 0 10px;
+        }
+        
+        .current-url {
+            font-size: 14px;
+            color: #666;
+            word-break: break-all;
+        }
+        
+        .run-button {
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .run-button:hover {
+            background-color: #0b7dda;
+        }
+        
+        .content {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .content iframe {
+            width: 100%;
+            flex: 1;
+            border: none;
+            display: none;
+        }
+        
+        .content iframe.active {
+            display: block;
+        }
+        
+        .no-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #666;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 8px 0;
+            }
+            
+            .navbar a {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                margin-top: 15px;
+            }
+            
+            .content-container {
+                padding: 15px;
+            }
+            
+            .content-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .navbar a {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .content-container {
+                padding: 10px;
+            }
+        }
+        
+        /* Modal styles for Z link */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .url-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .url-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .url-item:last-child {
+            border-bottom: none;
+        }
+        
+        .url-letter {
+            font-weight: bold;
+            width: 30px;
+            color: #333;
+        }
+        
+        .url-link {
+            flex: 1;
+            word-break: break-all;
+            margin: 0 10px;
+            color: #2196F3;
+        }
+        
+        .url-open {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <ul>
+            <li><a href="#" data-url="https://gyt-five.vercel.app/">A</a></li>
+            <li><a href="#" data-url="https://yut-omega.vercel.app/">B</a></li>
+            <li><a href="#" data-url="https://webpagedesigrn.netlify.app/">C</a></li>
+            <li><a href="#" data-url="https://gps4.netlify.app/">D</a></li>
+            <li><a href="#" data-url="https://image-rose-gamma.vercel.app/">E</a></li>
+            <li><a href="#" data-url="https://product-seven-chi.vercel.app/">F</a></li>
+            <li><a href="#" data-url="https://employ2.vercel.app/">G</a></li>
+            <li><a href="#" data-url="https://employ1.vercel.app/">H</a></li>
+            <li><a href="#" data-url="https://gym1-seven.vercel.app/">I</a></li>
+            <li><a href="#" data-url="https://tromnb-git-main-akhil80gits-projects.vercel.app/">J</a></li>
+            <li><a href="#" data-url="https://stundent6-attend-git-main-akhil80gits-projects.vercel.app/">K</a></li>
+            <li><a href="#" data-url="https://ye-git-main-akhil80gits-projects.vercel.app/">L</a></li>
+            <li><a href="#" data-url="https://nikhiladvansfullsite.vercel.app/">M</a></li>
+            <li><a href="#" data-url="https://www.freecodecamp.org/certification/fcc-2cf90b9c-978d-4e83-b279-b364567a9a4b/responsive-web-design">N</a></li>
+            <li><a href="#" data-url="https://akhil80git.github.io/Fynex/">O</a></li>
+            <li><a href="#" data-url="https://akhil80git.github.io/desigenWeb/">P</a></li>
+            <li><a href="#" data-url="https://akhil80git.github.io/styleWebsite/">Q</a></li>
+            <li><a href="#" data-url="https://i.ibb.co/PsC21m2P/1000006253.png">R</a></li>
+            <li><a href="#" data-url="https://i.ibb.co/C30LvJZ5/1000003895.jpg">S</a></li>
+            <li><a href="#" data-url="https://i.ibb.co/W4tdvTC0/1000003945.jpg">T</a></li>
+            <li><a href="#" data-url="https://i.ibb.co/HDrkCkMM/1000002517.jpg">U</a></li>
+            <li><a href="#" id="all-links">Z</a></li>
+        </ul>
+    </div>
+    
+    <h1>Link Navigation Page</h1>
+    
+    <div class="content-container">
+        <div class="content-header">
+            <div class="current-url" id="currentUrl">Select a link to view content</div>
+            <button class="run-button" id="runButton">Run in Browser</button>
+        </div>
+        
+        <div class="content">
+            <div class="no-content" id="noContent">Select a link from the navigation to view content</div>
+            <iframe id="contentFrame"></iframe>
+        </div>
+    </div>
+
+    <!-- Modal for Z link -->
+    <div class="modal" id="linksModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">All Links</div>
+                <button class="close-button" id="closeModal">&times;</button>
+            </div>
+            <ul class="url-list" id="urlList">
+                <!-- URLs will be added here by JavaScript -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const links = document.querySelectorAll('.navbar a');
+        const iframe = document.getElementById('contentFrame');
+        const noContent = document.getElementById('noContent');
+        const currentUrl = document.getElementById('currentUrl');
+        const runButton = document.getElementById('runButton');
+        const allLinksButton = document.getElementById('all-links');
+        const linksModal = document.getElementById('linksModal');
+        const closeModal = document.getElementById('closeModal');
+        const urlList = document.getElementById('urlList');
+
+        let currentActiveUrl = '';
+
+        // Load content when a link is clicked
+        links.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Handle Z link separately
+                if (link.id === 'all-links') {
+                    showAllLinksModal();
+                    return;
+                }
+                
+                const url = link.getAttribute('data-url');
+                loadUrl(url, link);
+            });
+        });
+
+        // Function to load URL in iframe
+        function loadUrl(url, linkElement = null) {
+            // Hide the no content message
+            noContent.style.display = 'none';
+            
+            // Set iframe source and show it
+            iframe.src = url;
+            iframe.classList.add('active');
+            
+            // Update current URL display
+            currentUrl.textContent = url;
+            currentActiveUrl = url;
+            
+            // Remove active class from all links
+            links.forEach(l => {
+                if (l.id !== 'all-links') {
+                    l.classList.remove('active');
+                }
+            });
+            
+            // Add active class to clicked link
+            if (linkElement) {
+                linkElement.classList.add('active');
+            }
+        }
+
+        // Run button - open current URL in new tab
+        runButton.addEventListener('click', () => {
+            if (currentActiveUrl) {
+                window.open(currentActiveUrl, '_blank');
+            } else {
+                alert('Please select a link first');
+            }
+        });
+
+        // Show all links modal
+        function showAllLinksModal() {
+            // Clear previous list
+            urlList.innerHTML = '';
+            
+            // Add all links to the modal
+            links.forEach(link => {
+                if (link.id !== 'all-links') {
+                    const url = link.getAttribute('data-url');
+                    const letter = link.textContent;
+                    
+                    const listItem = document.createElement('li');
+                    listItem.className = 'url-item';
+                    
+                    listItem.innerHTML = `
+                        <span class="url-letter">${letter}</span>
+                        <span class="url-link">${url}</span>
+                        <button class="url-open" data-url="${url}">Open</button>
+                    `;
+                    
+                    urlList.appendChild(listItem);
+                }
+            });
+            
+            // Add event listeners to open buttons in modal
+            document.querySelectorAll('.url-open').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const url = e.target.getAttribute('data-url');
+                    loadUrl(url);
+                    linksModal.style.display = 'none';
+                    
+                    // Find and activate the corresponding nav link
+                    links.forEach(link => {
+                        if (link.getAttribute('data-url') === url) {
+                            link.classList.add('active');
+                        } else if (link.id !== 'all-links') {
+                            link.classList.remove('active');
+                        }
+                    });
+                });
+            });
+            
+            // Show the modal
+            linksModal.style.display = 'flex';
+        }
+
+        // Close modal when close button is clicked
+        closeModal.addEventListener('click', () => {
+            linksModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside the content
+        window.addEventListener('click', (e) => {
+            if (e.target === linksModal) {
+                linksModal.style.display = 'none';
+            }
+        });
+
+        // Load the first link by default
+        if (links.length > 0) {
+            const firstLink = document.querySelector('.navbar a[data-url]');
+            if (firstLink) {
+                firstLink.click();
+            }
+        }
+    </script>
+</body>
+  </html>
